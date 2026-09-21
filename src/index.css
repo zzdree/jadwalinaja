@@ -7,13 +7,15 @@
 
   body {
     font-family: var(--font-sans);
+    background-color: #fafafa;
+    color: #171717;
   }
 }
 
-/* Custom scrollbar for timetable grid */
+/* Subtle, clean scrollbar */
 ::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+  width: 5px;
+  height: 5px;
 }
 
 ::-webkit-scrollbar-track {
@@ -21,10 +23,10 @@
 }
 
 ::-webkit-scrollbar-thumb {
-  background: rgba(148, 163, 184, 0.4);
+  background: #d4d4d8;
   border-radius: 9999px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(100, 116, 139, 0.6);
+  background: #a1a1aa;
 }

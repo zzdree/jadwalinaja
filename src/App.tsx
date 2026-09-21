@@ -7,8 +7,6 @@ import {
   saveTasks,
   loadUser,
   saveUser,
-  loadTheme,
-  saveTheme,
   syncWithCloudflareD1,
 } from './lib/storage';
 import { Navbar } from './components/Navbar';
@@ -26,7 +24,6 @@ export function App() {
   const [tasks, setTasks] = useState<Task[]>(loadTasks);
   const [user, setUser] = useState<User | null>(loadUser);
   const [viewMode, setViewMode] = useState<ViewMode>('weekly');
-  const [theme, setTheme] = useState<'light' | 'dark'>(loadTheme);
 
   // Modals state
   const [isCourseModalOpen, setIsCourseModalOpen] = useState(false);
@@ -39,11 +36,6 @@ export function App() {
 
   // Toast / sync feedback
   const [syncToast, setSyncToast] = useState<string | null>(null);
-
-  // Apply theme to document element
-  useEffect(() => {
-    saveTheme(theme);
-  }, [theme]);
 
   // Save courses and tasks locally whenever they change
   useEffect(() => {
@@ -66,10 +58,6 @@ export function App() {
     }
   }, [user, courses, tasks]);
 
-  const toggleTheme = () => {
-    setTheme((prev) => (prev === 'light' ? 'dark' : 'light'));
-  };
-
   // Course handlers
   const handleSaveCourse = (saved: Course) => {
     setCourses((prev) => {
@@ -84,7 +72,6 @@ export function App() {
 
   const handleDeleteCourse = (courseId: string) => {
     setCourses((prev) => prev.filter((c) => c.id !== courseId));
-    // Also remove course association from tasks
     setTasks((prev) =>
       prev.map((t) => (t.courseId === courseId ? { ...t, courseId: undefined } : t))
     );
@@ -154,7 +141,7 @@ export function App() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 transition-colors">
+    <div className="min-h-screen flex flex-col bg-[#fafafa] text-neutral-900 selection:bg-neutral-200">
       {/* Top Navigation */}
       <Navbar
         viewMode={viewMode}
@@ -165,13 +152,11 @@ export function App() {
         onOpenExportModal={() => setIsExportModalOpen(true)}
         onOpenAuthModal={() => setIsAuthModalOpen(true)}
         onLogout={handleLogout}
-        theme={theme}
-        toggleTheme={toggleTheme}
       />
 
       {/* Cloud Sync Toast Notification */}
       {syncToast && (
-        <div className="fixed bottom-6 right-6 z-50 flex items-center gap-2 px-4 py-2.5 bg-slate-900 dark:bg-slate-800 text-white text-xs font-semibold rounded-2xl shadow-xl border border-slate-700 animate-in fade-in slide-in-from-bottom-3 duration-200">
+        <div className="fixed bottom-6 right-6 z-50 flex items-center gap-2 px-4 py-2.5 bg-neutral-900 text-white text-xs font-bold rounded-2xl shadow-lg border border-neutral-700 animate-in fade-in slide-in-from-bottom-3 duration-200">
           <CloudCheck className="w-4 h-4 text-emerald-400" />
           <span>{syncToast}</span>
         </div>
@@ -184,14 +169,14 @@ export function App() {
 
         {/* View Content based on active tab */}
         {viewMode === 'weekly' && (
-          <section className="space-y-4 animate-in fade-in duration-150">
+          <section className="space-y-3 animate-in fade-in duration-150">
             <div className="flex items-center justify-between">
               <div>
-                <h2 className="text-xl font-extrabold text-slate-900 dark:text-slate-100">
+                <h2 className="text-lg font-black text-neutral-900 tracking-tight">
                   Jadwal Kuliah Mingguan
                 </h2>
-                <p className="text-xs text-slate-500 dark:text-slate-400">
-                  Visualisasi jadwal perkuliahan Senin sampai Sabtu dengan indikator bentrok otomatis.
+                <p className="text-xs text-neutral-500">
+                  Visualisasi jadwal Senin - Sabtu dengan deteksi bentrok otomatis.
                 </p>
               </div>
             </div>
@@ -205,13 +190,13 @@ export function App() {
         )}
 
         {viewMode === 'agenda' && (
-          <section className="space-y-4 animate-in fade-in duration-150">
+          <section className="space-y-3 animate-in fade-in duration-150">
             <div>
-              <h2 className="text-xl font-extrabold text-slate-900 dark:text-slate-100">
+              <h2 className="text-lg font-black text-neutral-900 tracking-tight">
                 Agenda Harian
               </h2>
-              <p className="text-xs text-slate-500 dark:text-slate-400">
-                Lihat daftar kelas per hari dengan status jadwal saat ini.
+              <p className="text-xs text-neutral-500">
+                Linimasa perkuliahan per hari dengan status jadwal terkini.
               </p>
             </div>
 
@@ -229,7 +214,7 @@ export function App() {
         )}
 
         {viewMode === 'tasks' && (
-          <section className="space-y-4 animate-in fade-in duration-150">
+          <section className="space-y-3 animate-in fade-in duration-150">
             <TaskTracker
               tasks={tasks}
               courses={courses}
@@ -242,10 +227,10 @@ export function App() {
       </main>
 
       {/* Footer */}
-      <footer className="w-full border-t border-slate-200 dark:border-slate-800/80 bg-white dark:bg-slate-900/60 py-6 mt-12 transition-colors">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-500 dark:text-slate-400">
+      <footer className="w-full border-t border-neutral-200/80 bg-white py-6 mt-12">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-neutral-500">
           <div className="flex items-center gap-2">
-            <span className="font-extrabold text-slate-700 dark:text-slate-300">
+            <span className="font-extrabold text-neutral-900">
               JadwalinAja
             </span>
             <span>• Dibuat dengan</span>
@@ -254,15 +239,15 @@ export function App() {
           </div>
 
           <div className="flex items-center gap-4">
-            <span className="flex items-center gap-1.5 text-indigo-500 font-semibold">
-              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+            <span className="flex items-center gap-1.5 text-neutral-700 font-semibold">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
               Cloudflare Pages & D1 Edge
             </span>
             <a
               href="https://github.com/zzdree/jadwalinaja"
               target="_blank"
               rel="noreferrer"
-              className="flex items-center gap-1.5 hover:text-slate-900 dark:hover:text-slate-100 transition-colors"
+              className="flex items-center gap-1.5 hover:text-neutral-900 transition-colors"
             >
               <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24">
                 <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z" />

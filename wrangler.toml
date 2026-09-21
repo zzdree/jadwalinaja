@@ -5,4 +5,4 @@ pages_build_output_dir = "dist"
 [[d1_databases]]
 binding = "DB"
 database_name = "jadwalinaja-db"
-database_id = "jadwalinaja-d1-placeholder"
+database_id = "448c62ea-f477-4d0a-8a43-57b281ea3383"

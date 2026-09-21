@@ -6,8 +6,6 @@ import {
   Clock,
   Plus,
   Share2,
-  Moon,
-  Sun,
   Cloud,
   LogOut,
 } from 'lucide-react';
@@ -21,8 +19,6 @@ interface NavbarProps {
   onOpenExportModal: () => void;
   onOpenAuthModal: () => void;
   onLogout: () => void;
-  theme: 'light' | 'dark';
-  toggleTheme: () => void;
 }
 
 export const Navbar: React.FC<NavbarProps> = ({
@@ -34,134 +30,129 @@ export const Navbar: React.FC<NavbarProps> = ({
   onOpenExportModal,
   onOpenAuthModal,
   onLogout,
-  theme,
-  toggleTheme,
 }) => {
   const totalSks = courses.reduce((acc, c) => acc + (Number(c.credits) || 0), 0);
 
   return (
-    <header className="sticky top-0 z-40 w-full border-b border-slate-200/80 dark:border-slate-800/80 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md transition-colors">
+    <header className="sticky top-0 z-40 w-full border-b border-neutral-200/80 bg-white/95 backdrop-blur-md">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16 gap-4">
           {/* Brand & SKS Counter */}
           <div className="flex items-center gap-3 sm:gap-4">
-            <div className="flex items-center gap-2.5 cursor-pointer" onClick={() => setViewMode('weekly')}>
-              <img src="/logo.svg" alt="JadwalinAja Logo" className="w-9 h-9 rounded-xl shadow-sm" />
-              <div>
-                <span className="text-xl font-extrabold tracking-tight bg-gradient-to-r from-indigo-600 via-indigo-500 to-sky-500 bg-clip-text text-transparent">
+            <div
+              className="flex items-center gap-2.5 cursor-pointer group"
+              onClick={() => setViewMode('weekly')}
+            >
+              <img
+                src="/logo.svg"
+                alt="JadwalinAja Logo"
+                className="w-8 h-8 rounded-lg shadow-2xs group-hover:scale-105 transition-transform"
+              />
+              <div className="flex items-baseline gap-2">
+                <span className="text-lg font-black tracking-tight text-neutral-900">
                   JadwalinAja
                 </span>
-                <span className="hidden sm:inline-block ml-2 px-1.5 py-0.5 text-[10px] font-semibold bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 rounded-md border border-indigo-200/50 dark:border-indigo-800/40">
-                  Cloudflare Edge
+                <span className="hidden sm:inline-block px-1.5 py-0.5 text-[10px] font-semibold bg-neutral-100 text-neutral-600 rounded border border-neutral-200">
+                  Kuliah
                 </span>
               </div>
             </div>
 
             {/* SKS Badge */}
-            <div className="hidden md:flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-slate-100 dark:bg-slate-800 text-xs font-medium text-slate-700 dark:text-slate-300">
-              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+            <div className="hidden md:flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-neutral-100 text-xs font-semibold text-neutral-700 border border-neutral-200/60">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
               <span>{totalSks} SKS Total</span>
-              <span className="text-slate-400">({courses.length} Matkul)</span>
+              <span className="text-neutral-400 font-normal">({courses.length} Matkul)</span>
             </div>
           </div>
 
           {/* Navigation Tabs (Center) */}
-          <nav className="hidden lg:flex items-center p-1 bg-slate-100 dark:bg-slate-800/90 rounded-xl">
+          <nav className="hidden lg:flex items-center p-1 bg-neutral-100/90 rounded-xl border border-neutral-200/60">
             <button
               onClick={() => setViewMode('weekly')}
-              className={`flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-sm font-semibold transition-all ${
+              className={`flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all ${
                 viewMode === 'weekly'
-                  ? 'bg-white dark:bg-slate-700 text-indigo-600 dark:text-indigo-300 shadow-sm'
-                  : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
+                  ? 'bg-white text-neutral-900 shadow-2xs'
+                  : 'text-neutral-500 hover:text-neutral-900'
               }`}
             >
-              <Calendar className="w-4 h-4" />
-              <span>Mingguan</span>
+              <Calendar className="w-3.5 h-3.5" />
+              <span>Jadwal Mingguan</span>
             </button>
 
             <button
               onClick={() => setViewMode('agenda')}
-              className={`flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-sm font-semibold transition-all ${
+              className={`flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all ${
                 viewMode === 'agenda'
-                  ? 'bg-white dark:bg-slate-700 text-indigo-600 dark:text-indigo-300 shadow-sm'
-                  : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
+                  ? 'bg-white text-neutral-900 shadow-2xs'
+                  : 'text-neutral-500 hover:text-neutral-900'
               }`}
             >
-              <Clock className="w-4 h-4" />
+              <Clock className="w-3.5 h-3.5" />
               <span>Agenda Hari Ini</span>
             </button>
 
             <button
               onClick={() => setViewMode('tasks')}
-              className={`flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-sm font-semibold transition-all ${
+              className={`flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all ${
                 viewMode === 'tasks'
-                  ? 'bg-white dark:bg-slate-700 text-indigo-600 dark:text-indigo-300 shadow-sm'
-                  : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
+                  ? 'bg-white text-neutral-900 shadow-2xs'
+                  : 'text-neutral-500 hover:text-neutral-900'
               }`}
             >
-              <ListTodo className="w-4 h-4" />
+              <ListTodo className="w-3.5 h-3.5" />
               <span>Tugas & Deadline</span>
             </button>
           </nav>
 
-          {/* Right Action Icons */}
-          <div className="flex items-center gap-2 sm:gap-2.5">
+          {/* Right Action Buttons */}
+          <div className="flex items-center gap-2">
             {/* Quick Add Course Button */}
             <button
               onClick={onOpenAddModal}
-              className="flex items-center gap-1.5 px-3 py-1.5 sm:px-4 sm:py-2 text-xs sm:text-sm font-semibold text-white bg-gradient-to-r from-indigo-600 to-indigo-500 hover:from-indigo-500 hover:to-indigo-600 rounded-xl shadow-sm hover:shadow-indigo-500/20 active:scale-95 transition-all cursor-pointer"
+              className="flex items-center gap-1.5 px-3 py-1.5 sm:px-3.5 sm:py-2 text-xs font-bold text-white bg-neutral-900 hover:bg-neutral-800 rounded-xl shadow-2xs active:scale-95 transition-all cursor-pointer"
             >
-              <Plus className="w-4 h-4" />
-              <span className="hidden sm:inline">Tambah Matkul</span>
-              <span className="sm:hidden">Tambah</span>
+              <Plus className="w-3.5 h-3.5" />
+              <span>Tambah Matkul</span>
             </button>
 
             {/* Export & Share Button */}
             <button
               onClick={onOpenExportModal}
-              title="Export & Share (Wallpaper, iCal, Backup)"
-              className="p-2 text-slate-600 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition-all cursor-pointer"
+              title="Export (Wallpaper PNG, iCal, Backup)"
+              className="p-2 text-neutral-600 hover:text-neutral-900 hover:bg-neutral-100 rounded-xl transition-all border border-neutral-200/80 cursor-pointer"
             >
-              <Share2 className="w-4 h-4 sm:w-5 sm:h-5" />
-            </button>
-
-            {/* Dark/Light Mode Toggle */}
-            <button
-              onClick={toggleTheme}
-              title={theme === 'dark' ? 'Ganti ke Mode Terang' : 'Ganti ke Mode Gelap'}
-              className="p-2 text-slate-600 dark:text-slate-300 hover:text-amber-500 dark:hover:text-amber-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition-all cursor-pointer"
-            >
-              {theme === 'dark' ? <Sun className="w-4 h-4 sm:w-5 sm:h-5" /> : <Moon className="w-4 h-4 sm:w-5 sm:h-5" />}
+              <Share2 className="w-4 h-4" />
             </button>
 
             {/* User Profile / Google Sign-in */}
             {user ? (
-              <div className="flex items-center gap-2 pl-1 sm:pl-2 border-l border-slate-200 dark:border-slate-800">
+              <div className="flex items-center gap-2 pl-2 border-l border-neutral-200">
                 {user.picture ? (
                   <img
                     src={user.picture}
                     alt={user.name}
-                    className="w-8 h-8 rounded-full ring-2 ring-indigo-500/30 object-cover"
+                    className="w-7 h-7 rounded-full ring-1 ring-neutral-300 object-cover"
                   />
                 ) : (
-                  <div className="w-8 h-8 rounded-full bg-indigo-100 dark:bg-indigo-900/60 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold text-xs">
+                  <div className="w-7 h-7 rounded-full bg-neutral-200 text-neutral-800 flex items-center justify-center font-bold text-xs">
                     {user.name.charAt(0)}
                   </div>
                 )}
                 <button
                   onClick={onLogout}
                   title="Logout"
-                  className="p-1.5 text-slate-400 hover:text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/30 rounded-lg transition-colors cursor-pointer"
+                  className="p-1.5 text-neutral-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors cursor-pointer"
                 >
-                  <LogOut className="w-4 h-4" />
+                  <LogOut className="w-3.5 h-3.5" />
                 </button>
               </div>
             ) : (
               <button
                 onClick={onOpenAuthModal}
-                className="flex items-center gap-1.5 px-2.5 py-1.5 sm:px-3 sm:py-2 text-xs font-semibold text-slate-700 dark:text-slate-200 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-xl transition-all cursor-pointer"
+                className="flex items-center gap-1.5 px-2.5 py-1.5 sm:px-3 sm:py-2 text-xs font-bold text-neutral-700 bg-white hover:bg-neutral-100 rounded-xl border border-neutral-200 transition-all cursor-pointer"
               >
-                <Cloud className="w-4 h-4 text-sky-500" />
+                <Cloud className="w-3.5 h-3.5 text-neutral-500" />
                 <span className="hidden sm:inline">Google Sync</span>
                 <span className="sm:hidden">Sync</span>
               </button>
@@ -169,39 +160,39 @@ export const Navbar: React.FC<NavbarProps> = ({
           </div>
         </div>
 
-        {/* Mobile View Switcher Tabs (Row below on small screens) */}
-        <div className="flex lg:hidden items-center justify-around py-2 border-t border-slate-200/60 dark:border-slate-800/60">
+        {/* Mobile View Switcher */}
+        <div className="flex lg:hidden items-center justify-around py-2 border-t border-neutral-200/70">
           <button
             onClick={() => setViewMode('weekly')}
-            className={`flex items-center gap-1.5 py-1 px-3 rounded-lg text-xs font-semibold ${
+            className={`flex items-center gap-1.5 py-1 px-3 rounded-lg text-xs font-bold ${
               viewMode === 'weekly'
-                ? 'bg-indigo-50 dark:bg-indigo-950 text-indigo-600 dark:text-indigo-400'
-                : 'text-slate-600 dark:text-slate-400'
+                ? 'bg-neutral-900 text-white'
+                : 'text-neutral-600'
             }`}
           >
-            <Calendar className="w-3.5 h-3.5" />
+            <Calendar className="w-3 h-3" />
             <span>Mingguan</span>
           </button>
           <button
             onClick={() => setViewMode('agenda')}
-            className={`flex items-center gap-1.5 py-1 px-3 rounded-lg text-xs font-semibold ${
+            className={`flex items-center gap-1.5 py-1 px-3 rounded-lg text-xs font-bold ${
               viewMode === 'agenda'
-                ? 'bg-indigo-50 dark:bg-indigo-950 text-indigo-600 dark:text-indigo-400'
-                : 'text-slate-600 dark:text-slate-400'
+                ? 'bg-neutral-900 text-white'
+                : 'text-neutral-600'
             }`}
           >
-            <Clock className="w-3.5 h-3.5" />
-            <span>Agenda Hari Ini</span>
+            <Clock className="w-3 h-3" />
+            <span>Harian</span>
           </button>
           <button
             onClick={() => setViewMode('tasks')}
-            className={`flex items-center gap-1.5 py-1 px-3 rounded-lg text-xs font-semibold ${
+            className={`flex items-center gap-1.5 py-1 px-3 rounded-lg text-xs font-bold ${
               viewMode === 'tasks'
-                ? 'bg-indigo-50 dark:bg-indigo-950 text-indigo-600 dark:text-indigo-400'
-                : 'text-slate-600 dark:text-slate-400'
+                ? 'bg-neutral-900 text-white'
+                : 'text-neutral-600'
             }`}
           >
-            <ListTodo className="w-3.5 h-3.5" />
+            <ListTodo className="w-3 h-3" />
             <span>Tugas</span>
           </button>
         </div>
