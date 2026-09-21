@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="none">
+  <defs>
+    <linearGradient id="grad1" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#6366f1"/>
+      <stop offset="100%" stop-color="#4f46e5"/>
+    </linearGradient>
+    <linearGradient id="accent" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#06b6d4"/>
+      <stop offset="100%" stop-color="#3b82f6"/>
+    </linearGradient>
+    <linearGradient id="spark" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#f59e0b"/>
+      <stop offset="100%" stop-color="#ef4444"/>
+    </linearGradient>
+  </defs>
+  <!-- Background rounded rectangle -->
+  <rect x="5" y="5" width="90" height="90" rx="24" fill="url(#grad1)" />
+  <!-- Timetable Grid blocks -->
+  <rect x="20" y="22" width="26" height="18" rx="6" fill="#ffffff" fill-opacity="0.95" />
+  <rect x="52" y="22" width="28" height="28" rx="6" fill="url(#spark)" />
+  <rect x="20" y="46" width="26" height="32" rx="6" fill="url(#accent)" />
+  <rect x="52" y="56" width="28" height="22" rx="6" fill="#ffffff" fill-opacity="0.95" />
+  <!-- Small dot indicator -->
+  <circle cx="72" cy="74" r="3" fill="#6366f1"/>
+</svg>

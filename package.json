@@ -1,0 +1,33 @@
+{
+  "name": "jadwalinaja",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc -b && vite build",
+    "preview": "vite preview",
+    "cf:deploy": "wrangler pages deploy dist",
+    "d1:init": "wrangler d1 execute jadwalinaja-db --local --file=./migrations/0001_initial_schema.sql"
+  },
+  "dependencies": {
+    "canvas-confetti": "^1.9.4",
+    "html-to-image": "^1.11.13",
+    "lucide-react": "^1.16.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^4.20260702.1",
+    "@tailwindcss/vite": "^4.0.9",
+    "@types/canvas-confetti": "^1.9.0",
+    "@types/node": "^22.13.9",
+    "@types/react": "^19.0.10",
+    "@types/react-dom": "^19.0.4",
+    "@vitejs/plugin-react": "^4.3.4",
+    "tailwindcss": "^4.0.9",
+    "typescript": "~5.7.2",
+    "vite": "^6.2.0",
+    "wrangler": "^3.111.0"
+  }
+}
