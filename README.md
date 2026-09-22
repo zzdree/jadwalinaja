@@ -1,92 +1,95 @@
 # JadwalinAja 🎓📅
 > *Atur jadwal kuliah gak pake ribet, jadwalin aja!*
 
-**JadwalinAja** adalah aplikasi web modern, ringan, dan estetik untuk mengorganisir jadwal perkuliahan mingguan, mendeteksi jadwal bentrok secara otomatis, serta mengelola tenggat waktu tugas bagi mahasiswa.
+**JadwalinAja** adalah aplikasi web modern, ringan, estetik, dan berorientasi utilitas nyata untuk mahasiswa di Indonesia. Dirancang untuk menggantikan portal akademik (SIAKAD) yang kaku dan lambat dengan antarmuka yang jernih, cepat dibuka di HP, serta anti-bentrok.
 
-Didesain khusus untuk ekosistem **Cloudflare (Cloudflare Pages + Cloudflare D1 SQLite Database + Edge Functions)** dengan dukungan **Google Login Sync** dan kapabilitas **Local-First (Offline-Ready)**.
-
----
-
-## ✨ Fitur Unggulan
-
-1. **📅 Interactive Weekly Timetable Grid:**
-   - Visualisasi jadwal mingguan (Senin - Sabtu) dari jam 07:00 hingga 21:00.
-   - Blok warna proporsional sesuai durasi jam mata kuliah.
-   - Klik slot jam kosong untuk menambahkan kelas langsung secara instan.
-
-2. **⚠️ Smart Conflict Detector (Anti-Bentrok):**
-   - Mendeteksi secara *real-time* jika ada dua mata kuliah yang memiliki irisan jam yang sama pada hari yang sama.
-   - Menampilkan peringatan visual merah/oranye serta daftar nama matkul yang bertabrakan.
-
-3. **⚡ Dynamic "Next Class" Banner:**
-   - Menghitung waktu lokal secara akurat: menampilkan kelas yang sedang berlangsung atau kelas berikutnya hari ini lengkap dengan hitung mundur menit, gedung, dan ruangan.
-
-4. **📋 Agenda Hari Ini (Mobile-Friendly):**
-   - Mode ringkasan harian berbasis kartu linimasa (*timeline card*), sangat nyaman dibaca lewat layar *smartphone*.
-
-5. **✅ Integrated Task & Assignment Tracker:**
-   - Catat deadline tugas kuliah, kuis, atau ujian yang terhubung ke mata kuliah terkait.
-   - Dilengkapi efek animasi *celebratory confetti* saat tugas berhasil diselesaikan!
-
-6. **🖼️ Export Wallpaper HD & Kalender (.ics):**
-   - **Download Wallpaper:** Mengubah jadwal kuliah menjadi poster gambar PNG beresolusi tinggi yang pas untuk *Lockscreen smartphone* Anda.
-   - **Download .ics:** Sinkronisasi satu-klik ke Google Calendar, Apple Calendar, atau Microsoft Outlook.
-   - **Cadangan JSON:** Ekspor dan impor data dengan mudah antar perangkat.
-
-7. **☁️ Cloudflare D1 & Google Sync:**
-   - Sinkronisasi awan menggunakan database SQL edge Cloudflare D1.
-   - Tetap dapat digunakan 100% tanpa login (Local-First), dan otomatis tersinkron saat masuk dengan akun Google.
+Dideploy di atas ekosistem **Cloudflare (Cloudflare Pages + Cloudflare D1 SQLite Database + Edge Functions)** dengan dukungan **PWA (Progressive Web App)**, **Google Auth Sync**, dan arsitektur **Local-First (Offline-Ready)**.
 
 ---
 
-## 🛠️ Tech Stack
+## ✨ Fitur-Fitur Utama (Real & Siap Pakai)
+
+### 1. 📅 Interactive Weekly Timetable Grid
+* Visualisasi matriks jam (07:00 - 21:00) vs hari (Senin - Sabtu) dengan tinggi kartu proporsional durasi jam mata kuliah.
+* **Quick Add:** Klik langsung pada slot jam kosong untuk menambah kelas di hari tersebut.
+* **Deteksi Bentrok Otomatis (*Real-time Conflict Detector*):** Langsung memperingatkan jika ada jam kuliah yang bertabrakan di hari yang sama.
+
+### 2. ⚡ Dynamic "Next Class" Banner & Tautan Cepat
+* Menghitung waktu lokal secara akurat: menampilkan kelas yang sedang berlangsung atau kelas berikutnya hari ini lengkap dengan hitung mundur menit, gedung, dan ruangan.
+* **Tombol Akses Cepat:** Tautan langsung ke Zoom / Google Meet dan grup WhatsApp kelas.
+
+### 3. 🪄 Smart Fast Import (Parser Teks SIAKAD Kampus)
+* Tidak perlu menginput matkul satu per satu secara manual. Cukup salin teks jadwal atau tabel dari SIAKAD kampus dan tempelkan ke form *Smart Import*. Sistem akan otomatis mendeteksi nama matkul, hari, jam, SKS, ruangan, dan dosen pengampu.
+
+### 4. 🛡️ Tracker Presensi & Sisa Jatah Bolos (Batas 75% Hadir)
+* Pantau kehadiran perkuliahan per mata kuliah untuk memastikan syarat minimal 75% kehadiran Ujian Akhir Semester (UAS) terpenuhi.
+* Indikator status kehadiran:
+  * **Aman:** Sisa jatah absen > 1x pertemuan.
+  * **Waspada:** Sisa jatah absen tinggal 1x pertemuan.
+  * **Bahaya:** Jatah absen habis (berisiko tidak boleh ikut ujian).
+* Tombol cepat: `+ Hadir`, `+ Izin/Sakit`, `+ Alpa/Bolos`.
+
+### 5. 🎯 Tugas, Kuis & Jadwal Ujian (Countdown H-X)
+* Pengelompokan kategori: **Tugas Harian**, **Kuis**, **Proyek/Makalah**, **UTS**, dan **UAS**.
+* Badge countdown deadline dinamis: *Hari Ini!*, *Besok*, *H-2*, *H-5*, atau *Terlewat X hari*.
+* Dilengkapi tautan pengumpulan (Google Classroom / Spada LMS) dan efek *confetti* saat tugas selesai.
+
+### 6. 🖼️ Multi-Ratio Wallpaper Generator (HP & Laptop)
+* **Smartphone Lockscreen (9:16 Portret):** Poster ringkasan jadwal vertikal beresolusi tinggi, pas untuk dijadikan wallpaper layar kunci smartphone.
+* **Desktop / Laptop (16:9 Lanskap):** Format horisontal tajam untuk layar monitor belajar.
+* **Cetak Dokumen A4 Resmi:** Format cetak dokumen hitam-putih rapi yang siap diprint untuk arsip KRS atau ditempel di kamar kos.
+* **Export .ics:** Sinkronisasi jadwal mingguan ke Google Calendar, Apple Calendar, atau Microsoft Outlook.
+* **Cadangan JSON:** Ekspor dan impor data jadwal antar perangkat.
+
+### 7. 📱 PWA Support (Install ke Layar Utama HP)
+* Mendukung instalasi aplikasi web (*Add to Home Screen*) di perangkat Android & iOS tanpa perlu unduh dari Play Store/App Store.
+* Buka dalam mode layar penuh (*standalone app*).
+
+### 8. ☁️ Cloudflare D1 Edge & Google Sync
+* Tetap dapat digunakan 100% tanpa internet (Offline-First).
+* Sinkronisasi awan otomatis ke database SQLite Cloudflare D1 di region APAC saat login dengan akun Google.
+
+---
+
+## 🛠️ Arsitektur & Tech Stack
 
 * **Frontend:** React 19, TypeScript, Vite, Tailwind CSS v4, Lucide Icons.
-* **Hosting / CDN:** Cloudflare Pages (Super low latency, server edge di Jakarta).
-* **Backend Edge:** Cloudflare Pages Functions (`/functions/api/*`).
+* **Hosting & CDN:** Cloudflare Pages (Server Edge di Jakarta & Singapore).
+* **Backend:** Cloudflare Pages Functions (`/functions/api/sync.ts` & `/functions/api/auth/google.ts`).
 * **Database:** Cloudflare D1 (Serverless SQLite at the Edge).
-* **Libraries:** `html-to-image` (wallpaper generator), `canvas-confetti` (gamifikasi tugas).
+* **Skills Terintegrasi:** `antislop` (38 Rules Anti-AI Slop), `frontend-design`, dan `hallmark`.
 
 ---
 
-## 🚀 Panduan Menjalankan Secara Lokal
+## 🚀 Menjalankan Proyek Secara Lokal
 
-1. **Clone repositori:**
+1. **Clone repository:**
    ```bash
    git clone https://github.com/zzdree/jadwalinaja.git
    cd jadwalinaja
    ```
 
-2. **Install dependensi:**
+2. **Install dependencies:**
    ```bash
    npm install
    ```
 
-3. **Jalankan local development server:**
+3. **Jalankan development server:**
    ```bash
    npm run dev
    ```
-   Buka browser di `http://localhost:5173`.
+   Buka `http://localhost:5173` di browser Anda.
 
 ---
 
-## 🌐 Panduan Deploy ke Cloudflare Pages
+## 🌐 Deploy ke Cloudflare Pages
 
-### Cara 1: Otomatis via GitHub (Sangat Direkomendasikan)
-1. Buka dashboard [Cloudflare Dashboard](https://dash.cloudflare.com/) > **Workers & Pages**.
-2. Klik **Create application** > Tab **Pages** > **Connect to Git**.
-3. Pilih repositori `zzdree/jadwalinaja`.
-4. Konfigurasi Build Settings:
-   * **Framework preset:** `Vite`
-   * **Build command:** `npm run build`
-   * **Build output directory:** `dist`
-5. (Opsional untuk D1 Database): Buat D1 Database bernama `jadwalinaja-db`, lalu tambahkan D1 binding bernama `DB` pada tab **Settings > Functions > D1 Database bindings**.
-6. Klik **Save and Deploy**. Website Anda langsung aktif di `https://jadwalinaja.pages.dev`!
-
-### Cara 2: Deploy via Wrangler CLI
 ```bash
+# Build production bundle
 npm run build
-npx wrangler pages deploy dist --project-name=jadwalinaja
+
+# Deploy via Wrangler CLI
+npx wrangler pages deploy dist --project-name=jadwalinaja --branch=main
 ```
 
 ---

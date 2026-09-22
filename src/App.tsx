@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Course, Task, User, ViewMode, DayOfWeek } from './types';
+import { Course, Task, User, ViewMode, DayOfWeek, AttendanceRecord } from './types';
 import {
   loadCourses,
   saveCourses,
@@ -9,14 +9,17 @@ import {
   saveUser,
   syncWithCloudflareD1,
 } from './lib/storage';
+import { getDayName } from './lib/utils';
 import { LandingPage } from './components/LandingPage';
 import { Navbar } from './components/Navbar';
 import { NextClassBanner } from './components/NextClassBanner';
 import { WeeklyTimetable } from './components/WeeklyTimetable';
 import { DailyAgenda } from './components/DailyAgenda';
+import { AttendanceTracker } from './components/AttendanceTracker';
 import { TaskTracker } from './components/TaskTracker';
 import { CourseModal } from './components/CourseModal';
 import { ExportModal } from './components/ExportModal';
+import { SmartImportModal } from './components/SmartImportModal';
 import { AuthModal } from './components/AuthModal';
 import { CloudCheck, Heart } from 'lucide-react';
 
@@ -32,6 +35,7 @@ export function App() {
   const [quickAddDay, setQuickAddDay] = useState<DayOfWeek | undefined>(undefined);
   const [quickAddHour, setQuickAddHour] = useState<number | undefined>(undefined);
 
+  const [isImportModalOpen, setIsImportModalOpen] = useState(false);
   const [isExportModalOpen, setIsExportModalOpen] = useState(false);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
 
@@ -99,6 +103,12 @@ export function App() {
     setIsCourseModalOpen(true);
   };
 
+  const handleUpdateAttendance = (courseId: string, updated: AttendanceRecord) => {
+    setCourses((prev) =>
+      prev.map((c) => (c.id === courseId ? { ...c, attendance: updated } : c))
+    );
+  };
+
   // Task handlers
   const handleToggleTask = (taskId: string) => {
     setTasks((prev) =>
@@ -141,7 +151,15 @@ export function App() {
     if (importedTasks.length > 0) setTasks(importedTasks);
   };
 
-  // 1. If NOT logged in, show Landing Page with Preview & Google Login CTA
+  const handleSmartImport = (imported: Course[]) => {
+    setCourses((prev) => [...prev, ...imported]);
+    setSyncToast(`${imported.length} mata kuliah berhasil diimpor!`);
+    setTimeout(() => setSyncToast(null), 3000);
+  };
+
+  const totalSks = courses.reduce((acc, c) => acc + (Number(c.credits) || 0), 0);
+
+  // 1. If NOT logged in, show Landing Page with Preview & Google Login
   if (!user) {
     return (
       <>
@@ -169,6 +187,7 @@ export function App() {
         courses={courses}
         user={user}
         onOpenAddModal={handleOpenAdd}
+        onOpenImportModal={() => setIsImportModalOpen(true)}
         onOpenExportModal={() => setIsExportModalOpen(true)}
         onOpenAuthModal={() => setIsAuthModalOpen(true)}
         onLogout={handleLogout}
@@ -176,14 +195,14 @@ export function App() {
 
       {/* Cloud Sync Toast Notification */}
       {syncToast && (
-        <div className="fixed bottom-6 right-6 z-50 flex items-center gap-2 px-4 py-2.5 bg-neutral-900 text-white text-xs font-bold rounded-2xl shadow-lg border border-neutral-700 animate-in fade-in slide-in-from-bottom-3 duration-200">
+        <div className="fixed bottom-6 right-6 z-50 flex items-center gap-2 px-4 py-2.5 bg-neutral-900 text-white text-xs font-bold rounded-2xl shadow-lg border border-neutral-700 animate-in fade-in slide-in-from-bottom-3 duration-200 no-print">
           <CloudCheck className="w-4 h-4 text-emerald-400" />
           <span>{syncToast}</span>
         </div>
       )}
 
       {/* Main Content Area */}
-      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6 no-print">
         {/* Realtime Next Class Hero Banner */}
         <NextClassBanner courses={courses} onCourseClick={handleOpenEdit} />
 
@@ -233,6 +252,15 @@ export function App() {
           </section>
         )}
 
+        {viewMode === 'attendance' && (
+          <section className="space-y-3 animate-in fade-in duration-150">
+            <AttendanceTracker
+              courses={courses}
+              onUpdateAttendance={handleUpdateAttendance}
+            />
+          </section>
+        )}
+
         {viewMode === 'tasks' && (
           <section className="space-y-3 animate-in fade-in duration-150">
             <TaskTracker
@@ -246,8 +274,67 @@ export function App() {
         )}
       </main>
 
+      {/* Official Printable A4 Schedule (Visible ONLY during print) */}
+      <div className="print-only p-8 text-black bg-white font-sans">
+        <div className="text-center border-b-2 border-black pb-4 mb-6">
+          <h1 className="text-2xl font-black uppercase tracking-wider">
+            Kartu Rencana Studi & Jadwal Kuliah Mingguan
+          </h1>
+          <p className="text-xs text-neutral-600 mt-1">
+            Mahasiswa: <span className="font-bold">{user.name}</span> ({user.email}) • Total Beban: <span className="font-bold">{totalSks} SKS</span> ({courses.length} Mata Kuliah)
+          </p>
+        </div>
+
+        <table className="w-full text-xs border-collapse border border-black mb-8">
+          <thead>
+            <tr className="bg-neutral-100">
+              <th className="border border-black p-2 text-left w-8">No</th>
+              <th className="border border-black p-2 text-left">Kode</th>
+              <th className="border border-black p-2 text-left">Mata Kuliah</th>
+              <th className="border border-black p-2 text-center w-12">SKS</th>
+              <th className="border border-black p-2 text-left w-28">Hari & Jam</th>
+              <th className="border border-black p-2 text-left w-24">Ruang</th>
+              <th className="border border-black p-2 text-left">Dosen Pengampu</th>
+            </tr>
+          </thead>
+          <tbody>
+            {courses
+              .slice()
+              .sort((a, b) => a.dayOfWeek - b.dayOfWeek || a.startTime.localeCompare(b.startTime))
+              .map((c, i) => (
+                <tr key={c.id}>
+                  <td className="border border-black p-2 text-center">{i + 1}</td>
+                  <td className="border border-black p-2 font-mono">{c.code || '-'}</td>
+                  <td className="border border-black p-2 font-bold">{c.name}</td>
+                  <td className="border border-black p-2 text-center">{c.credits}</td>
+                  <td className="border border-black p-2">
+                    {getDayName(c.dayOfWeek)}, {c.startTime} - {c.endTime}
+                  </td>
+                  <td className="border border-black p-2">{c.room || '-'}</td>
+                  <td className="border border-black p-2">{c.lecturer || '-'}</td>
+                </tr>
+              ))}
+          </tbody>
+        </table>
+
+        {/* Signature Area */}
+        <div className="grid grid-cols-2 text-center text-xs pt-8">
+          <div>
+            <p>Mengetahui,</p>
+            <p className="font-semibold">Dosen Pembimbing Akademik</p>
+            <div className="h-16" />
+            <p>(........................................................)</p>
+          </div>
+          <div>
+            <p>Mahasiswa yang bersangkutan,</p>
+            <div className="h-16" />
+            <p className="font-bold underline">{user.name}</p>
+          </div>
+        </div>
+      </div>
+
       {/* Footer */}
-      <footer className="w-full border-t border-neutral-200/80 bg-white py-6 mt-12">
+      <footer className="w-full border-t border-neutral-200 bg-white py-6 mt-12 no-print">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-neutral-500">
           <div className="flex items-center gap-2">
             <span className="font-extrabold text-neutral-900">
@@ -288,6 +375,12 @@ export function App() {
         defaultDay={quickAddDay}
         defaultHour={quickAddHour}
         allCourses={courses}
+      />
+
+      <SmartImportModal
+        isOpen={isImportModalOpen}
+        onClose={() => setIsImportModalOpen(false)}
+        onImport={handleSmartImport}
       />
 
       <ExportModal

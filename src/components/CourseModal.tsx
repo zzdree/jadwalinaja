@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Course, DAYS_CONFIG, PRESET_COLORS, DayOfWeek, ClassType } from '../types';
 import { isCoursesConflicting, timeToMinutes, minutesToTime } from '../lib/utils';
-import { X, AlertTriangle, Trash2, Clock } from 'lucide-react';
+import { X, AlertTriangle, Trash2, Clock, Video, MessageCircle, Globe } from 'lucide-react';
 
 interface CourseModalProps {
   isOpen: boolean;
@@ -36,6 +36,10 @@ export const CourseModal: React.FC<CourseModalProps> = ({
   const [classType, setClassType] = useState<ClassType>('teori');
   const [color, setColor] = useState(PRESET_COLORS[0].hex);
   const [notes, setNotes] = useState('');
+  const [meetUrl, setMeetUrl] = useState('');
+  const [whatsappUrl, setWhatsappUrl] = useState('');
+  const [lmsUrl, setLmsUrl] = useState('');
+  const [maxAbsence, setMaxAbsence] = useState<number>(3);
 
   useEffect(() => {
     if (initialCourse) {
@@ -51,6 +55,10 @@ export const CourseModal: React.FC<CourseModalProps> = ({
       setClassType(initialCourse.classType || 'teori');
       setColor(initialCourse.color || PRESET_COLORS[0].hex);
       setNotes(initialCourse.notes || '');
+      setMeetUrl(initialCourse.meetUrl || '');
+      setWhatsappUrl(initialCourse.whatsappUrl || '');
+      setLmsUrl(initialCourse.lmsUrl || '');
+      setMaxAbsence(initialCourse.attendance?.maxAbsenceAllowed || 3);
     } else {
       setName('');
       setCode('');
@@ -66,6 +74,10 @@ export const CourseModal: React.FC<CourseModalProps> = ({
       setClassType('teori');
       setColor(PRESET_COLORS[Math.floor(Math.random() * PRESET_COLORS.length)].hex);
       setNotes('');
+      setMeetUrl('');
+      setWhatsappUrl('');
+      setLmsUrl('');
+      setMaxAbsence(3);
     }
   }, [initialCourse, defaultDay, defaultHour, isOpen]);
 
@@ -83,6 +95,18 @@ export const CourseModal: React.FC<CourseModalProps> = ({
     classType,
     color,
     notes,
+    meetUrl: meetUrl.trim() || undefined,
+    whatsappUrl: whatsappUrl.trim() || undefined,
+    lmsUrl: lmsUrl.trim() || undefined,
+    attendance: initialCourse?.attendance
+      ? { ...initialCourse.attendance, maxAbsenceAllowed: maxAbsence }
+      : {
+          attended: 0,
+          totalSessions: 14,
+          maxAbsenceAllowed: maxAbsence,
+          permission: 0,
+          absence: 0,
+        },
   };
 
   const conflictingCourses = allCourses.filter((c) =>
@@ -148,7 +172,7 @@ export const CourseModal: React.FC<CourseModalProps> = ({
         )}
 
         {/* Form Body */}
-        <form onSubmit={handleSubmit} className="mt-5 space-y-3.5">
+        <form onSubmit={handleSubmit} className="mt-5 space-y-3.5 max-h-[70vh] overflow-y-auto pr-1">
           {/* Course Name */}
           <div>
             <label className="block text-xs font-bold text-neutral-700 mb-1">
@@ -333,6 +357,69 @@ export const CourseModal: React.FC<CourseModalProps> = ({
             </div>
           </div>
 
+          {/* Online Links: Zoom & WA & LMS */}
+          <div className="p-3 bg-neutral-50 border border-neutral-200 rounded-xl space-y-2.5">
+            <span className="block text-xs font-black text-neutral-800">
+              Tautan Online & Komunikasi (Opsional)
+            </span>
+
+            <div>
+              <label className="block text-[11px] font-semibold text-neutral-600 mb-1 flex items-center gap-1">
+                <Video className="w-3 h-3 text-neutral-500" /> Link Zoom / Google Meet
+              </label>
+              <input
+                type="url"
+                value={meetUrl}
+                onChange={(e) => setMeetUrl(e.target.value)}
+                placeholder="https://zoom.us/j/... atau https://meet.google.com/..."
+                className="w-full px-3 py-1.5 text-xs bg-white border border-neutral-200 rounded-lg text-neutral-900"
+              />
+            </div>
+
+            <div>
+              <label className="block text-[11px] font-semibold text-neutral-600 mb-1 flex items-center gap-1">
+                <MessageCircle className="w-3 h-3 text-neutral-500" /> Link Grup WhatsApp / Telegram
+              </label>
+              <input
+                type="url"
+                value={whatsappUrl}
+                onChange={(e) => setWhatsappUrl(e.target.value)}
+                placeholder="https://chat.whatsapp.com/..."
+                className="w-full px-3 py-1.5 text-xs bg-white border border-neutral-200 rounded-lg text-neutral-900"
+              />
+            </div>
+
+            <div>
+              <label className="block text-[11px] font-semibold text-neutral-600 mb-1 flex items-center gap-1">
+                <Globe className="w-3 h-3 text-neutral-500" /> Link Google Classroom / LMS Spada
+              </label>
+              <input
+                type="url"
+                value={lmsUrl}
+                onChange={(e) => setLmsUrl(e.target.value)}
+                placeholder="https://classroom.google.com/..."
+                className="w-full px-3 py-1.5 text-xs bg-white border border-neutral-200 rounded-lg text-neutral-900"
+              />
+            </div>
+          </div>
+
+          {/* Jatah Absen */}
+          <div>
+            <label className="block text-xs font-bold text-neutral-700 mb-1">
+              Batas Maksimal Bolos / Alpa (Semester Ini)
+            </label>
+            <select
+              value={maxAbsence}
+              onChange={(e) => setMaxAbsence(Number(e.target.value))}
+              className="w-full px-3 py-2 text-xs bg-neutral-50 border border-neutral-200 rounded-xl focus:outline-none focus:ring-1 focus:ring-neutral-900 text-neutral-900 font-semibold"
+            >
+              <option value={2}>2x Pertemuan</option>
+              <option value={3}>3x Pertemuan (Standar 20%)</option>
+              <option value={4}>4x Pertemuan (Standar 25%)</option>
+              <option value={5}>5x Pertemuan</option>
+            </select>
+          </div>
+
           {/* Color Picker Palette */}
           <div>
             <label className="block text-xs font-bold text-neutral-700 mb-1.5">
@@ -365,7 +452,7 @@ export const CourseModal: React.FC<CourseModalProps> = ({
               type="text"
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
-              placeholder="Contoh: Bawa jas lab, link materi kuliah..."
+              placeholder="Contoh: Bawa jas lab, tugas mingguan..."
               className="w-full px-3 py-2 text-xs bg-neutral-50 border border-neutral-200 rounded-xl focus:outline-none focus:ring-1 focus:ring-neutral-900 text-neutral-900"
             />
           </div>

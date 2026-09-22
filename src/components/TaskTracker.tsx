@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { Task, Course, Priority } from '../types';
+import { Task, Course, Priority, TaskCategory, TASK_CATEGORIES } from '../types';
+import { getDeadlineStatus } from '../lib/utils';
 import confetti from 'canvas-confetti';
 import {
   CheckCircle2,
@@ -9,6 +10,8 @@ import {
   Calendar,
   BookOpen,
   Filter,
+  ExternalLink,
+  Clock,
 } from 'lucide-react';
 
 interface TaskTrackerProps {
@@ -28,6 +31,7 @@ export const TaskTracker: React.FC<TaskTrackerProps> = ({
 }) => {
   const [filterCourse, setFilterCourse] = useState<string>('all');
   const [filterStatus, setFilterStatus] = useState<'all' | 'pending' | 'completed'>('all');
+  const [filterCategory, setFilterCategory] = useState<string>('all');
   const [isAdding, setIsAdding] = useState<boolean>(false);
 
   // Form state
@@ -36,19 +40,32 @@ export const TaskTracker: React.FC<TaskTrackerProps> = ({
   const [courseId, setCourseId] = useState('');
   const [dueDate, setDueDate] = useState('');
   const [priority, setPriority] = useState<Priority>('medium');
+  const [category, setCategory] = useState<TaskCategory>('tugas');
+  const [linkUrl, setLinkUrl] = useState('');
 
-  const filteredTasks = tasks.filter((t) => {
-    if (filterCourse !== 'all' && t.courseId !== filterCourse) return false;
-    if (filterStatus === 'pending' && t.isCompleted) return false;
-    if (filterStatus === 'completed' && !t.isCompleted) return false;
-    return true;
-  });
+  // Sort and filter tasks
+  const filteredTasks = tasks
+    .filter((t) => {
+      if (filterCourse !== 'all' && t.courseId !== filterCourse) return false;
+      if (filterStatus === 'pending' && t.isCompleted) return false;
+      if (filterStatus === 'completed' && !t.isCompleted) return false;
+      if (filterCategory !== 'all' && t.category !== filterCategory) return false;
+      return true;
+    })
+    .sort((a, b) => {
+      // Completed at bottom
+      if (a.isCompleted !== b.isCompleted) return a.isCompleted ? 1 : -1;
+      // Closer deadline first
+      if (!a.dueDate) return 1;
+      if (!b.dueDate) return -1;
+      return new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime();
+    });
 
   const handleToggle = (task: Task) => {
     if (!task.isCompleted) {
       confetti({
-        particleCount: 45,
-        spread: 55,
+        particleCount: 50,
+        spread: 60,
         origin: { y: 0.8 },
       });
     }
@@ -65,6 +82,8 @@ export const TaskTracker: React.FC<TaskTrackerProps> = ({
       courseId: courseId || undefined,
       dueDate: dueDate || new Date().toISOString().split('T')[0],
       priority,
+      category,
+      linkUrl: linkUrl.trim() || undefined,
       isCompleted: false,
     });
 
@@ -73,6 +92,8 @@ export const TaskTracker: React.FC<TaskTrackerProps> = ({
     setCourseId('');
     setDueDate('');
     setPriority('medium');
+    setCategory('tugas');
+    setLinkUrl('');
     setIsAdding(false);
   };
 
@@ -81,14 +102,14 @@ export const TaskTracker: React.FC<TaskTrackerProps> = ({
       {/* Top Action Bar */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white border border-neutral-200 rounded-2xl p-4 sm:p-5 shadow-2xs">
         <div>
-          <h3 className="text-base font-extrabold text-neutral-900 flex items-center gap-2">
-            <span>Tugas & Deadline Kuliah</span>
+          <h3 className="text-base font-black text-neutral-900 flex items-center gap-2">
+            <span>Tugas, Kuis & Jadwal Ujian</span>
             <span className="text-xs px-2 py-0.5 rounded-full bg-neutral-100 text-neutral-700 font-bold border border-neutral-200">
-              {tasks.filter((t) => !t.isCompleted).length} Tersisa
+              {tasks.filter((t) => !t.isCompleted).length} Belum Selesai
             </span>
           </h3>
           <p className="text-xs text-neutral-500 mt-0.5">
-            Kelola tugas kuliah, kuis, dan ujian terintegrasi dengan mata kuliah Anda.
+            Daftar tenggat tugas terintegrasi langsung dengan mata kuliah Anda.
           </p>
         </div>
 
@@ -108,22 +129,39 @@ export const TaskTracker: React.FC<TaskTrackerProps> = ({
           className="bg-white border border-neutral-300 rounded-2xl p-5 shadow-xs space-y-4 animate-in fade-in duration-150"
         >
           <h4 className="font-extrabold text-sm text-neutral-900">
-            Form Tambah Tugas Baru
+            Form Tambah Tugas / Jadwal Ujian Baru
           </h4>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
             <div className="sm:col-span-2">
               <label className="block text-xs font-bold text-neutral-700 mb-1">
-                Judul Tugas / Catatan *
+                Judul Tugas / Nama Ujian *
               </label>
               <input
                 type="text"
                 required
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
-                placeholder="Contoh: Tugas 2 - Makalah Arsitektur Jaringan"
+                placeholder="Contoh: Tugas 2 - Makalah Analisis Algoritma"
                 className="w-full px-3.5 py-2 text-xs bg-neutral-50 border border-neutral-200 rounded-xl focus:outline-none focus:ring-1 focus:ring-neutral-900 text-neutral-900"
               />
+            </div>
+
+            <div>
+              <label className="block text-xs font-bold text-neutral-700 mb-1">
+                Kategori Kegiatan
+              </label>
+              <select
+                value={category}
+                onChange={(e) => setCategory(e.target.value as TaskCategory)}
+                className="w-full px-3 py-2 text-xs bg-neutral-50 border border-neutral-200 rounded-xl focus:outline-none focus:ring-1 focus:ring-neutral-900 text-neutral-900 font-semibold"
+              >
+                {TASK_CATEGORIES.map((cat) => (
+                  <option key={cat.id} value={cat.id}>
+                    {cat.label}
+                  </option>
+                ))}
+              </select>
             </div>
 
             <div>
@@ -173,13 +211,26 @@ export const TaskTracker: React.FC<TaskTrackerProps> = ({
 
             <div className="sm:col-span-2">
               <label className="block text-xs font-bold text-neutral-700 mb-1">
+                Link Pengumpulan / Soal (Opsional)
+              </label>
+              <input
+                type="url"
+                value={linkUrl}
+                onChange={(e) => setLinkUrl(e.target.value)}
+                placeholder="https://classroom.google.com/..."
+                className="w-full px-3.5 py-2 text-xs bg-neutral-50 border border-neutral-200 rounded-xl focus:outline-none focus:ring-1 focus:ring-neutral-900 text-neutral-900"
+              />
+            </div>
+
+            <div className="sm:col-span-2">
+              <label className="block text-xs font-bold text-neutral-700 mb-1">
                 Deskripsi / Catatan Tambahan
               </label>
               <textarea
                 rows={2}
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
-                placeholder="Format PDF, link tugas Google Classroom, dsb..."
+                placeholder="Format PDF, batas submit jam 23:59..."
                 className="w-full px-3.5 py-2 text-xs bg-neutral-50 border border-neutral-200 rounded-xl focus:outline-none focus:ring-1 focus:ring-neutral-900 text-neutral-900"
               />
             </div>
@@ -203,7 +254,7 @@ export const TaskTracker: React.FC<TaskTrackerProps> = ({
         </form>
       )}
 
-      {/* Filters */}
+      {/* Filters row */}
       <div className="flex flex-wrap items-center gap-2">
         <div className="flex items-center gap-1.5 text-xs font-bold text-neutral-400 mr-1">
           <Filter className="w-3.5 h-3.5" />
@@ -219,6 +270,19 @@ export const TaskTracker: React.FC<TaskTrackerProps> = ({
           {courses.map((c) => (
             <option key={c.id} value={c.id}>
               {c.name}
+            </option>
+          ))}
+        </select>
+
+        <select
+          value={filterCategory}
+          onChange={(e) => setFilterCategory(e.target.value)}
+          className="text-xs font-semibold bg-white border border-neutral-200 px-3 py-1.5 rounded-lg text-neutral-800"
+        >
+          <option value="all">Semua Kategori</option>
+          {TASK_CATEGORIES.map((cat) => (
+            <option key={cat.id} value={cat.id}>
+              {cat.label}
             </option>
           ))}
         </select>
@@ -269,31 +333,21 @@ export const TaskTracker: React.FC<TaskTrackerProps> = ({
           </p>
         </div>
       ) : (
-        <div className="space-y-2">
+        <div className="space-y-2.5">
           {filteredTasks.map((task) => {
             const course = courses.find((c) => c.id === task.courseId);
+            const deadline = getDeadlineStatus(task.dueDate);
 
-            let priorityBadge = null;
-            if (task.priority === 'high') {
-              priorityBadge = (
-                <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-rose-50 text-rose-700 border border-rose-200">
-                  Mendesak
-                </span>
-              );
-            } else if (task.priority === 'medium') {
-              priorityBadge = (
-                <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded bg-amber-50 text-amber-700 border border-amber-200">
-                  Sedang
-                </span>
-              );
-            }
+            const categoryConfig = TASK_CATEGORIES.find((cat) => cat.id === task.category);
 
             return (
               <div
                 key={task.id}
-                className={`flex items-start justify-between gap-3 p-3.5 bg-white border rounded-2xl transition-all shadow-2xs ${
+                className={`flex items-start justify-between gap-3 p-4 bg-white border rounded-2xl transition-all shadow-2xs ${
                   task.isCompleted
                     ? 'border-neutral-200 opacity-60'
+                    : deadline.isOverdue
+                    ? 'border-rose-200 bg-rose-50/30'
                     : 'border-neutral-200 hover:border-neutral-300'
                 }`}
               >
@@ -303,16 +357,16 @@ export const TaskTracker: React.FC<TaskTrackerProps> = ({
                     className="mt-0.5 text-neutral-400 hover:text-neutral-900 transition-colors cursor-pointer"
                   >
                     {task.isCompleted ? (
-                      <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+                      <CheckCircle2 className="w-5 h-5 text-emerald-600" />
                     ) : (
-                      <Circle className="w-4 h-4" />
+                      <Circle className="w-5 h-5" />
                     )}
                   </button>
 
                   <div className="space-y-1">
                     <div className="flex flex-wrap items-center gap-2">
                       <h4
-                        className={`text-xs font-bold ${
+                        className={`text-sm font-bold ${
                           task.isCompleted
                             ? 'line-through text-neutral-400'
                             : 'text-neutral-900'
@@ -320,7 +374,31 @@ export const TaskTracker: React.FC<TaskTrackerProps> = ({
                       >
                         {task.title}
                       </h4>
-                      {priorityBadge}
+
+                      {/* Category Badge */}
+                      {categoryConfig && (
+                        <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${categoryConfig.badgeColor}`}>
+                          {categoryConfig.label}
+                        </span>
+                      )}
+
+                      {/* Deadline countdown badge */}
+                      {!task.isCompleted && task.dueDate && (
+                        <span
+                          className={`text-[10px] font-extrabold px-2 py-0.5 rounded-full flex items-center gap-1 ${
+                            deadline.isOverdue
+                              ? 'bg-rose-100 text-rose-800 border border-rose-300'
+                              : deadline.isToday
+                              ? 'bg-amber-100 text-amber-900 border border-amber-300 animate-pulse'
+                              : deadline.isUrgent
+                              ? 'bg-amber-50 text-amber-800 border border-amber-200'
+                              : 'bg-neutral-100 text-neutral-700'
+                          }`}
+                        >
+                          <Clock className="w-3 h-3" />
+                          <span>{deadline.label}</span>
+                        </span>
+                      )}
                     </div>
 
                     {task.description && (
@@ -329,21 +407,32 @@ export const TaskTracker: React.FC<TaskTrackerProps> = ({
                       </p>
                     )}
 
-                    <div className="flex flex-wrap items-center gap-3 text-[11px] text-neutral-400 pt-0.5">
+                    <div className="flex flex-wrap items-center gap-3 text-xs text-neutral-500 pt-1">
                       {course && (
                         <span
                           className="flex items-center gap-1 font-semibold"
                           style={{ color: course.color }}
                         >
-                          <BookOpen className="w-3 h-3" />
+                          <BookOpen className="w-3.5 h-3.5" />
                           {course.name}
                         </span>
                       )}
                       {task.dueDate && (
                         <span className="flex items-center gap-1 font-medium text-neutral-500">
-                          <Calendar className="w-3 h-3" />
-                          Deadline: {task.dueDate}
+                          <Calendar className="w-3.5 h-3.5" />
+                          {task.dueDate}
                         </span>
+                      )}
+                      {task.linkUrl && (
+                        <a
+                          href={task.linkUrl}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="flex items-center gap-1 text-neutral-700 font-bold hover:underline"
+                        >
+                          <ExternalLink className="w-3 h-3" />
+                          <span>Buka Tautan Tugas</span>
+                        </a>
                       )}
                     </div>
                   </div>
@@ -354,7 +443,7 @@ export const TaskTracker: React.FC<TaskTrackerProps> = ({
                   title="Hapus tugas"
                   className="p-1.5 text-neutral-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors cursor-pointer"
                 >
-                  <Trash2 className="w-3.5 h-3.5" />
+                  <Trash2 className="w-4 h-4" />
                 </button>
               </div>
             );

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Course } from '../types';
 import { getNextClassInfo } from '../lib/utils';
-import { Clock, MapPin, User, CheckCircle2 } from 'lucide-react';
+import { Clock, MapPin, User, CheckCircle2, Video, MessageCircle } from 'lucide-react';
 
 interface NextClassBannerProps {
   courses: Course[];
@@ -106,9 +106,9 @@ export const NextClassBanner: React.FC<NextClassBannerProps> = ({ courses, onCou
           </div>
         </div>
 
-        {/* Right Side Status */}
-        <div className="flex items-center justify-between sm:justify-end gap-3 pt-2 sm:pt-0 border-t sm:border-t-0 border-neutral-100">
-          <div className="text-left sm:text-right">
+        {/* Right Side: Quick Action Buttons & Status */}
+        <div className="flex flex-wrap sm:flex-col items-start sm:items-end justify-between sm:justify-center gap-2 pt-2 sm:pt-0 border-t sm:border-t-0 border-neutral-100">
+          <div>
             <span
               className={`text-xs font-bold ${
                 isOngoing ? 'text-emerald-600' : 'text-neutral-900'
@@ -116,7 +116,33 @@ export const NextClassBanner: React.FC<NextClassBannerProps> = ({ courses, onCou
             >
               {message}
             </span>
-            <p className="text-[11px] text-neutral-400">Klik untuk kelola matkul →</p>
+            <p className="text-[11px] text-neutral-400 hidden sm:block">Klik untuk kelola matkul →</p>
+          </div>
+
+          {/* Quick External Links (Zoom / WhatsApp) */}
+          <div className="flex items-center gap-1.5" onClick={(e) => e.stopPropagation()}>
+            {course.meetUrl && (
+              <a
+                href={course.meetUrl}
+                target="_blank"
+                rel="noreferrer"
+                className="px-2.5 py-1 bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 rounded-lg text-[11px] font-bold flex items-center gap-1"
+              >
+                <Video className="w-3 h-3" />
+                <span>Buka Kelas</span>
+              </a>
+            )}
+            {course.whatsappUrl && (
+              <a
+                href={course.whatsappUrl}
+                target="_blank"
+                rel="noreferrer"
+                className="px-2.5 py-1 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 rounded-lg text-[11px] font-bold flex items-center gap-1"
+              >
+                <MessageCircle className="w-3 h-3" />
+                <span>Grup WA</span>
+              </a>
+            )}
           </div>
         </div>
       </div>

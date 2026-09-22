@@ -6,9 +6,11 @@ import {
   X,
   Download,
   Calendar,
-  Image as ImageIcon,
   FileJson,
   Upload,
+  Printer,
+  Smartphone,
+  Monitor,
   Check,
 } from 'lucide-react';
 
@@ -27,37 +29,76 @@ export const ExportModal: React.FC<ExportModalProps> = ({
   tasks,
   onImportCourses,
 }) => {
-  const posterRef = useRef<HTMLDivElement>(null);
-  const [isGeneratingImage, setIsGeneratingImage] = useState(false);
-  const [imageGeneratedSuccess, setImageGeneratedSuccess] = useState(false);
+  const phonePosterRef = useRef<HTMLDivElement>(null);
+  const desktopPosterRef = useRef<HTMLDivElement>(null);
+
+  const [isGeneratingPhone, setIsGeneratingPhone] = useState(false);
+  const [isGeneratingDesktop, setIsGeneratingDesktop] = useState(false);
+  const [downloadSuccess, setDownloadSuccess] = useState<string | null>(null);
 
   if (!isOpen) return null;
 
-  const handleExportImage = async () => {
-    if (!posterRef.current) return;
+  // 1. Export Phone Wallpaper (9:16)
+  const handleExportPhone = async () => {
+    if (!phonePosterRef.current) return;
     try {
-      setIsGeneratingImage(true);
-      const dataUrl = await toPng(posterRef.current, {
+      setIsGeneratingPhone(true);
+      const dataUrl = await toPng(phonePosterRef.current, {
+        cacheBust: true,
+        quality: 0.95,
+        pixelRatio: 2.5,
+      });
+
+      const link = document.createElement('a');
+      link.download = `Jadwal-HP-JadwalinAja-${new Date().toISOString().split('T')[0]}.png`;
+      link.href = dataUrl;
+      link.click();
+
+      setDownloadSuccess('phone');
+      setTimeout(() => setDownloadSuccess(null), 3000);
+    } catch (err) {
+      console.error(err);
+      alert('Gagal membuat wallpaper HP.');
+    } finally {
+      setIsGeneratingPhone(false);
+    }
+  };
+
+  // 2. Export Desktop Wallpaper (16:9)
+  const handleExportDesktop = async () => {
+    if (!desktopPosterRef.current) return;
+    try {
+      setIsGeneratingDesktop(true);
+      const dataUrl = await toPng(desktopPosterRef.current, {
         cacheBust: true,
         quality: 0.95,
         pixelRatio: 2,
       });
 
       const link = document.createElement('a');
-      link.download = `Jadwal-Kuliah-JadwalinAja-${new Date().toISOString().split('T')[0]}.png`;
+      link.download = `Jadwal-Desktop-JadwalinAja-${new Date().toISOString().split('T')[0]}.png`;
       link.href = dataUrl;
       link.click();
 
-      setImageGeneratedSuccess(true);
-      setTimeout(() => setImageGeneratedSuccess(false), 3000);
+      setDownloadSuccess('desktop');
+      setTimeout(() => setDownloadSuccess(null), 3000);
     } catch (err) {
-      console.error('Failed to generate image', err);
-      alert('Gagal membuat gambar poster jadwal. Silakan coba lagi.');
+      console.error(err);
+      alert('Gagal membuat wallpaper desktop.');
     } finally {
-      setIsGeneratingImage(false);
+      setIsGeneratingDesktop(false);
     }
   };
 
+  // 3. Print A4 Document
+  const handlePrint = () => {
+    onClose();
+    setTimeout(() => {
+      window.print();
+    }, 300);
+  };
+
+  // 4. iCalendar (.ics)
   const handleExportICS = () => {
     const icsContent = generateICS(courses);
     downloadFile(
@@ -67,10 +108,11 @@ export const ExportModal: React.FC<ExportModalProps> = ({
     );
   };
 
+  // 5. JSON Backup
   const handleExportJSON = () => {
     const backupData = {
       app: 'JadwalinAja',
-      version: '1.0',
+      version: '2.0',
       exportedAt: new Date().toISOString(),
       courses,
       tasks,
@@ -107,16 +149,16 @@ export const ExportModal: React.FC<ExportModalProps> = ({
   const totalSks = courses.reduce((acc, c) => acc + (Number(c.credits) || 0), 0);
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-xs overflow-y-auto">
-      <div className="relative w-full max-w-xl bg-white rounded-3xl shadow-xl border border-neutral-200 p-6 sm:p-7 my-8 animate-in fade-in zoom-in-95 duration-150">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-xs overflow-y-auto no-print">
+      <div className="relative w-full max-w-xl bg-white rounded-3xl shadow-2xl border border-neutral-200 p-6 sm:p-7 my-8 animate-in fade-in zoom-in-95 duration-150">
         {/* Header */}
         <div className="flex items-center justify-between pb-4 border-b border-neutral-100">
           <div>
-            <h3 className="text-lg font-extrabold text-neutral-900">
-              Export & Bagikan Jadwal
+            <h3 className="text-lg font-black text-neutral-900">
+              Export & Cetak Jadwal
             </h3>
             <p className="text-xs text-neutral-500 mt-0.5">
-              Simpan jadwal untuk wallpaper smartphone, kalender digital, atau cadangan.
+              Pilih format kebutuhan: wallpaper HP, wallpaper desktop, cetak A4, atau kalender digital.
             </p>
           </div>
           <button
@@ -129,33 +171,33 @@ export const ExportModal: React.FC<ExportModalProps> = ({
 
         {/* Options */}
         <div className="mt-5 space-y-3">
-          {/* 1. Wallpaper Image */}
+          {/* 1. Phone Lockscreen Wallpaper */}
           <div className="p-4 rounded-2xl border border-neutral-200 bg-neutral-50/60 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div className="flex items-start gap-3">
               <div className="w-9 h-9 rounded-xl bg-neutral-900 text-white flex items-center justify-center shrink-0">
-                <ImageIcon className="w-4 h-4" />
+                <Smartphone className="w-4 h-4" />
               </div>
               <div>
                 <h4 className="text-xs font-bold text-neutral-900 flex items-center gap-1.5">
-                  <span>Download Wallpaper / Gambar HD</span>
+                  <span>Wallpaper Lockscreen Smartphone</span>
                   <span className="text-[10px] font-bold px-1.5 py-0.2 rounded bg-neutral-200 text-neutral-800">
-                    PNG
+                    9:16 Portret
                   </span>
                 </h4>
                 <p className="text-xs text-neutral-500 mt-0.5">
-                  Poster jadwal beresolusi tinggi, pas untuk Lockscreen smartphone.
+                  Format vertikal pas untuk layar kunci HP, cepat dilihat saat di lorong kampus.
                 </p>
               </div>
             </div>
 
             <button
-              onClick={handleExportImage}
-              disabled={isGeneratingImage}
+              onClick={handleExportPhone}
+              disabled={isGeneratingPhone}
               className="flex items-center justify-center gap-1.5 px-3.5 py-2 bg-neutral-900 hover:bg-neutral-800 text-white rounded-xl text-xs font-bold transition-all shrink-0 cursor-pointer disabled:opacity-50"
             >
-              {isGeneratingImage ? (
+              {isGeneratingPhone ? (
                 <span>Memproses...</span>
-              ) : imageGeneratedSuccess ? (
+              ) : downloadSuccess === 'phone' ? (
                 <>
                   <Check className="w-3.5 h-3.5 text-emerald-400" />
                   <span>Tersimpan!</span>
@@ -163,16 +205,81 @@ export const ExportModal: React.FC<ExportModalProps> = ({
               ) : (
                 <>
                   <Download className="w-3.5 h-3.5" />
-                  <span>Download PNG</span>
+                  <span>Unduh PNG</span>
                 </>
               )}
             </button>
           </div>
 
-          {/* 2. iCalendar .ics */}
+          {/* 2. Desktop Wallpaper */}
           <div className="p-4 rounded-2xl border border-neutral-200 bg-white flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div className="flex items-start gap-3">
-              <div className="w-9 h-9 rounded-xl bg-neutral-100 text-neutral-700 flex items-center justify-center shrink-0 border border-neutral-200">
+              <div className="w-9 h-9 rounded-xl bg-neutral-100 text-neutral-800 border border-neutral-200 flex items-center justify-center shrink-0">
+                <Monitor className="w-4 h-4" />
+              </div>
+              <div>
+                <h4 className="text-xs font-bold text-neutral-900 flex items-center gap-1.5">
+                  <span>Wallpaper Laptop / Desktop</span>
+                  <span className="text-[10px] font-bold px-1.5 py-0.2 rounded bg-neutral-100 text-neutral-600">
+                    16:9 Lanskap
+                  </span>
+                </h4>
+                <p className="text-xs text-neutral-500 mt-0.5">
+                  Format horizontal resolusi tinggi untuk layar laptop atau monitor belajar.
+                </p>
+              </div>
+            </div>
+
+            <button
+              onClick={handleExportDesktop}
+              disabled={isGeneratingDesktop}
+              className="flex items-center justify-center gap-1.5 px-3.5 py-2 bg-white hover:bg-neutral-100 text-neutral-900 border border-neutral-200 rounded-xl text-xs font-bold transition-all shrink-0 cursor-pointer disabled:opacity-50"
+            >
+              {isGeneratingDesktop ? (
+                <span>Memproses...</span>
+              ) : downloadSuccess === 'desktop' ? (
+                <>
+                  <Check className="w-3.5 h-3.5 text-emerald-600" />
+                  <span>Tersimpan!</span>
+                </>
+              ) : (
+                <>
+                  <Download className="w-3.5 h-3.5" />
+                  <span>Unduh PNG</span>
+                </>
+              )}
+            </button>
+          </div>
+
+          {/* 3. Print A4 */}
+          <div className="p-4 rounded-2xl border border-neutral-200 bg-white flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div className="flex items-start gap-3">
+              <div className="w-9 h-9 rounded-xl bg-neutral-100 text-neutral-800 border border-neutral-200 flex items-center justify-center shrink-0">
+                <Printer className="w-4 h-4" />
+              </div>
+              <div>
+                <h4 className="text-xs font-bold text-neutral-900">
+                  Cetak Dokumen Resmi (Format A4 / PDF)
+                </h4>
+                <p className="text-xs text-neutral-500 mt-0.5">
+                  Format cetak bersih hitam-putih untuk ditempel di kamar kos atau arsip KRS.
+                </p>
+              </div>
+            </div>
+
+            <button
+              onClick={handlePrint}
+              className="flex items-center justify-center gap-1.5 px-3.5 py-2 bg-white hover:bg-neutral-100 text-neutral-900 border border-neutral-200 rounded-xl text-xs font-bold transition-all shrink-0 cursor-pointer"
+            >
+              <Printer className="w-3.5 h-3.5" />
+              <span>Cetak / PDF</span>
+            </button>
+          </div>
+
+          {/* 4. Calendar .ics */}
+          <div className="p-4 rounded-2xl border border-neutral-200 bg-white flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div className="flex items-start gap-3">
+              <div className="w-9 h-9 rounded-xl bg-neutral-100 text-neutral-800 border border-neutral-200 flex items-center justify-center shrink-0">
                 <Calendar className="w-4 h-4" />
               </div>
               <div>
@@ -180,24 +287,24 @@ export const ExportModal: React.FC<ExportModalProps> = ({
                   Google & Apple Calendar (.ics)
                 </h4>
                 <p className="text-xs text-neutral-500 mt-0.5">
-                  Sinkronisasi sekali klik agar jadwal otomatis berulang tiap minggu di aplikasi kalender.
+                  Sinkronisasi berulang tiap pekan di aplikasi kalender Google/Apple/Outlook.
                 </p>
               </div>
             </div>
 
             <button
               onClick={handleExportICS}
-              className="flex items-center justify-center gap-1.5 px-3.5 py-2 bg-white hover:bg-neutral-100 text-neutral-800 border border-neutral-200 rounded-xl text-xs font-bold transition-all shrink-0 cursor-pointer"
+              className="flex items-center justify-center gap-1.5 px-3.5 py-2 bg-white hover:bg-neutral-100 text-neutral-900 border border-neutral-200 rounded-xl text-xs font-bold transition-all shrink-0 cursor-pointer"
             >
               <Download className="w-3.5 h-3.5" />
-              <span>Download .ics</span>
+              <span>Unduh .ics</span>
             </button>
           </div>
 
-          {/* 3. JSON Backup */}
+          {/* 5. JSON Backup */}
           <div className="p-4 rounded-2xl border border-neutral-200 bg-white flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div className="flex items-start gap-3">
-              <div className="w-9 h-9 rounded-xl bg-neutral-100 text-neutral-700 flex items-center justify-center shrink-0 border border-neutral-200">
+              <div className="w-9 h-9 rounded-xl bg-neutral-100 text-neutral-800 border border-neutral-200 flex items-center justify-center shrink-0">
                 <FileJson className="w-4 h-4" />
               </div>
               <div>
@@ -205,13 +312,13 @@ export const ExportModal: React.FC<ExportModalProps> = ({
                   Cadangan & Pindah Perangkat (JSON)
                 </h4>
                 <p className="text-xs text-neutral-500 mt-0.5">
-                  Ekspor atau impor data matkul dan tugas antar laptop & smartphone.
+                  Simpan cadangan data jadwal atau pulihkan dari file lama.
                 </p>
               </div>
             </div>
 
             <div className="flex items-center gap-2 shrink-0">
-              <label className="flex items-center justify-center gap-1 px-3 py-1.5 bg-neutral-100 hover:bg-neutral-200 text-neutral-700 rounded-xl text-xs font-bold transition-all cursor-pointer">
+              <label className="flex items-center justify-center gap-1 px-3 py-1.5 bg-neutral-100 hover:bg-neutral-200 text-neutral-800 rounded-xl text-xs font-bold transition-all cursor-pointer">
                 <Upload className="w-3 h-3" />
                 <span>Impor</span>
                 <input
@@ -224,7 +331,7 @@ export const ExportModal: React.FC<ExportModalProps> = ({
 
               <button
                 onClick={handleExportJSON}
-                className="flex items-center justify-center gap-1 px-3 py-1.5 bg-neutral-100 hover:bg-neutral-200 text-neutral-700 rounded-xl text-xs font-bold transition-all cursor-pointer"
+                className="flex items-center justify-center gap-1 px-3 py-1.5 bg-neutral-100 hover:bg-neutral-200 text-neutral-800 rounded-xl text-xs font-bold transition-all cursor-pointer"
               >
                 <Download className="w-3 h-3" />
                 <span>Cadangkan</span>
@@ -233,68 +340,46 @@ export const ExportModal: React.FC<ExportModalProps> = ({
           </div>
         </div>
 
-        {/* Offscreen Poster for html-to-image capture: Clean Minimalist Poster */}
+        {/* ================= OFFSCREEN ELEMENTS FOR RENDERING ================= */}
+
+        {/* Offscreen Phone Poster (430px x 932px - 9:16 mobile ratio) */}
         <div style={{ position: 'absolute', left: '-9999px', top: '-9999px' }}>
           <div
-            ref={posterRef}
-            className="w-[800px] p-10 bg-white text-neutral-900 rounded-3xl font-sans border-8 border-neutral-100"
+            ref={phonePosterRef}
+            className="w-[430px] p-6 bg-white text-neutral-900 font-sans"
             style={{ fontFamily: 'Plus Jakarta Sans, sans-serif' }}
           >
-            {/* Header */}
-            <div className="flex items-center justify-between border-b-2 border-neutral-900 pb-5 mb-6">
-              <div>
-                <h2 className="text-3xl font-black tracking-tight text-neutral-900">
-                  JadwalinAja
-                </h2>
-                <p className="text-xs font-semibold text-neutral-500 mt-1">
-                  Jadwal Kuliah Mingguan • {totalSks} SKS Total ({courses.length} Mata Kuliah)
-                </p>
-              </div>
-              <div className="text-right">
-                <span className="text-xs font-bold px-3 py-1 rounded-full bg-neutral-100 text-neutral-800 border border-neutral-200">
-                  Semester Aktif
-                </span>
+            <div className="border-b-2 border-neutral-900 pb-3 mb-4">
+              <h2 className="text-2xl font-black text-neutral-900">JadwalinAja</h2>
+              <div className="text-[11px] font-bold text-neutral-500 mt-0.5">
+                {totalSks} SKS Total ({courses.length} Matkul)
               </div>
             </div>
 
-            {/* Courses list */}
-            <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-3">
               {[1, 2, 3, 4, 5, 6].map((dayId) => {
                 const dayCourses = courses.filter((c) => c.dayOfWeek === dayId);
                 if (dayCourses.length === 0) return null;
 
                 return (
-                  <div
-                    key={dayId}
-                    className="border border-neutral-200 rounded-2xl p-4 bg-neutral-50/50 space-y-2.5"
-                  >
-                    <div className="flex items-center justify-between border-b border-neutral-200 pb-1.5">
-                      <span className="font-black text-xs text-neutral-900">
-                        {getDayName(dayId as any)}
-                      </span>
-                      <span className="text-[10px] font-bold text-neutral-400">
-                        {dayCourses.length} Kelas
-                      </span>
+                  <div key={dayId} className="border border-neutral-200 rounded-xl p-3 bg-neutral-50">
+                    <div className="font-black text-xs text-neutral-900 border-b border-neutral-200 pb-1 mb-2">
+                      {getDayName(dayId as any)}
                     </div>
-
-                    <div className="space-y-2">
+                    <div className="space-y-1.5">
                       {dayCourses.map((c) => (
                         <div
                           key={c.id}
-                          className="p-2.5 rounded-xl bg-white border border-neutral-200/90 shadow-2xs border-l-4"
+                          className="p-2 bg-white rounded-lg border-l-4 border border-neutral-200 shadow-2xs"
                           style={{ borderLeftColor: c.color }}
                         >
                           <div className="flex items-center justify-between">
-                            <span className="font-extrabold text-xs text-neutral-900">{c.name}</span>
-                            <span className="text-[10px] text-neutral-500 font-bold">
-                              {c.credits} SKS
-                            </span>
+                            <span className="font-extrabold text-[11px] text-neutral-900">{c.name}</span>
+                            <span className="text-[9px] text-neutral-500 font-bold">{c.credits} SKS</span>
                           </div>
-                          <div className="text-[11px] font-semibold text-neutral-500 mt-1 flex items-center justify-between">
-                            <span>
-                              {c.startTime} - {c.endTime}
-                            </span>
-                            <span className="text-neutral-700 font-medium">{c.room || '-'}</span>
+                          <div className="text-[10px] text-neutral-500 font-medium flex items-center justify-between mt-0.5">
+                            <span>{c.startTime} - {c.endTime}</span>
+                            <span>{c.room || '-'}</span>
                           </div>
                         </div>
                       ))}
@@ -304,9 +389,66 @@ export const ExportModal: React.FC<ExportModalProps> = ({
               })}
             </div>
 
-            {/* Footer */}
-            <div className="mt-8 pt-4 border-t border-neutral-200 text-center text-[11px] text-neutral-400 font-medium">
-              JadwalinAja • Atur jadwal kuliah gak pake ribet!
+            <div className="mt-6 pt-3 border-t border-neutral-200 text-center text-[10px] text-neutral-400 font-medium">
+              jadwalinaja.pages.dev
+            </div>
+          </div>
+        </div>
+
+        {/* Offscreen Desktop Poster (1200px x 675px - 16:9 desktop ratio) */}
+        <div style={{ position: 'absolute', left: '-9999px', top: '-9999px' }}>
+          <div
+            ref={desktopPosterRef}
+            className="w-[1200px] p-10 bg-white text-neutral-900 font-sans border-4 border-neutral-200"
+            style={{ fontFamily: 'Plus Jakarta Sans, sans-serif' }}
+          >
+            <div className="flex items-center justify-between border-b-2 border-neutral-900 pb-4 mb-6">
+              <div>
+                <h2 className="text-3xl font-black text-neutral-900">JadwalinAja</h2>
+                <p className="text-xs font-bold text-neutral-500 mt-1">
+                  Jadwal Kuliah Mingguan • {totalSks} SKS Total ({courses.length} Mata Kuliah)
+                </p>
+              </div>
+              <span className="text-xs font-bold px-3 py-1 bg-neutral-100 border border-neutral-300 rounded-lg">
+                Semester Aktif
+              </span>
+            </div>
+
+            <div className="grid grid-cols-3 gap-4">
+              {[1, 2, 3, 4, 5, 6].map((dayId) => {
+                const dayCourses = courses.filter((c) => c.dayOfWeek === dayId);
+                if (dayCourses.length === 0) return null;
+
+                return (
+                  <div key={dayId} className="border border-neutral-200 rounded-xl p-3.5 bg-neutral-50">
+                    <div className="font-black text-sm text-neutral-900 border-b border-neutral-200 pb-1.5 mb-2">
+                      {getDayName(dayId as any)}
+                    </div>
+                    <div className="space-y-2">
+                      {dayCourses.map((c) => (
+                        <div
+                          key={c.id}
+                          className="p-2.5 bg-white rounded-xl border border-neutral-200 border-l-4 shadow-2xs"
+                          style={{ borderLeftColor: c.color }}
+                        >
+                          <div className="flex items-center justify-between">
+                            <span className="font-extrabold text-xs text-neutral-900">{c.name}</span>
+                            <span className="text-[10px] text-neutral-500 font-bold">{c.credits} SKS</span>
+                          </div>
+                          <div className="text-[11px] text-neutral-500 font-semibold flex items-center justify-between mt-1">
+                            <span>{c.startTime} - {c.endTime}</span>
+                            <span>{c.room || '-'}</span>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+
+            <div className="mt-8 pt-4 border-t border-neutral-200 text-center text-xs text-neutral-400">
+              JadwalinAja • Atur jadwal kuliah gak pake ribet! • jadwalinaja.pages.dev
             </div>
           </div>
         </div>

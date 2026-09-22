@@ -3,7 +3,6 @@ import { Course, Task, User } from '../types';
 const COURSES_KEY = 'jadwalinaja_courses';
 const TASKS_KEY = 'jadwalinaja_tasks';
 const USER_KEY = 'jadwalinaja_user';
-const THEME_KEY = 'jadwalinaja_theme';
 
 export const INITIAL_SAMPLE_COURSES: Course[] = [
   {
@@ -18,8 +17,17 @@ export const INITIAL_SAMPLE_COURSES: Course[] = [
     building: 'Gedung B',
     lecturer: 'Dr. Ir. Hendra Wijaya, M.T.',
     classType: 'praktikum',
-    color: '#4f46e5', // Indigo
+    color: '#2563eb', // Blue
     notes: 'Bawa laptop dan install Node.js',
+    meetUrl: 'https://meet.google.com',
+    whatsappUrl: 'https://chat.whatsapp.com',
+    attendance: {
+      attended: 6,
+      totalSessions: 14,
+      maxAbsenceAllowed: 3,
+      permission: 1,
+      absence: 0,
+    },
   },
   {
     id: 'c2',
@@ -33,8 +41,15 @@ export const INITIAL_SAMPLE_COURSES: Course[] = [
     building: 'Gedung A',
     lecturer: 'Prof. Sri Rahayu, Ph.D.',
     classType: 'teori',
-    color: '#0284c7', // Sky
+    color: '#0891b2', // Cyan
     notes: 'Kuis mingguan tiap pertemuan',
+    attendance: {
+      attended: 5,
+      totalSessions: 14,
+      maxAbsenceAllowed: 3,
+      permission: 0,
+      absence: 1,
+    },
   },
   {
     id: 'c3',
@@ -48,8 +63,15 @@ export const INITIAL_SAMPLE_COURSES: Course[] = [
     building: 'Gedung Rektorat Baru',
     lecturer: 'Budi Santoso, S.Kom., M.Sc.',
     classType: 'teori',
-    color: '#16a34a', // Emerald
+    color: '#059669', // Emerald
     notes: 'Pembentukan kelompok tugas besar',
+    attendance: {
+      attended: 7,
+      totalSessions: 14,
+      maxAbsenceAllowed: 3,
+      permission: 0,
+      absence: 0,
+    },
   },
   {
     id: 'c4',
@@ -63,8 +85,15 @@ export const INITIAL_SAMPLE_COURSES: Course[] = [
     building: 'Gedung C',
     lecturer: 'Dr. Ahmad Fauzi, M.Cs.',
     classType: 'teori',
-    color: '#9333ea', // Purple
+    color: '#7c3aed', // Purple
     notes: 'Materi machine learning & deep learning',
+    attendance: {
+      attended: 4,
+      totalSessions: 14,
+      maxAbsenceAllowed: 3,
+      permission: 1,
+      absence: 2, // Waspada! sisa 1x jatah absen
+    },
   },
   {
     id: 'c5',
@@ -80,6 +109,13 @@ export const INITIAL_SAMPLE_COURSES: Course[] = [
     classType: 'praktikum',
     color: '#ea580c', // Orange
     notes: 'Simulasi penetration testing',
+    attendance: {
+      attended: 6,
+      totalSessions: 14,
+      maxAbsenceAllowed: 3,
+      permission: 0,
+      absence: 0,
+    },
   },
   {
     id: 'c6',
@@ -93,8 +129,16 @@ export const INITIAL_SAMPLE_COURSES: Course[] = [
     building: 'Daring',
     lecturer: 'Dina Kusuma, S.E., MBA',
     classType: 'online',
-    color: '#e11d48', // Rose
+    color: '#dc2626', // Red
     notes: 'Link Zoom di grup WhatsApp',
+    meetUrl: 'https://zoom.us',
+    attendance: {
+      attended: 6,
+      totalSessions: 14,
+      maxAbsenceAllowed: 3,
+      permission: 0,
+      absence: 0,
+    },
   },
 ];
 
@@ -104,8 +148,10 @@ export const INITIAL_SAMPLE_TASKS: Task[] = [
     courseId: 'c1',
     title: 'Tugas 1: Slice UI Dashboard dengan Tailwind',
     description: 'Kumpulkan link repository GitHub dan live demo di Cloudflare',
-    dueDate: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+    dueDate: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
     priority: 'high',
+    category: 'tugas',
+    linkUrl: 'https://classroom.google.com',
     isCompleted: false,
     createdAt: new Date().toISOString(),
   },
@@ -114,19 +160,32 @@ export const INITIAL_SAMPLE_TASKS: Task[] = [
     courseId: 'c3',
     title: 'Proposal Proyek Tugas Besar RPL',
     description: 'Format PDF maksimal 10 halaman, bab 1 latar belakang dan use case',
-    dueDate: new Date(Date.now() + 6 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+    dueDate: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
     priority: 'medium',
+    category: 'proyek',
     isCompleted: false,
     createdAt: new Date().toISOString(),
   },
   {
     id: 't3',
     courseId: 'c2',
-    title: 'Review Bab 4: Sharding & Replikasi SQL',
-    description: 'Persiapan kuis hari Senin',
-    dueDate: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-    priority: 'low',
-    isCompleted: true,
+    title: 'Kuis 1: Sharding & Replikasi SQL',
+    description: 'Kuis daring via portal LMS jam 13:00 tepat',
+    dueDate: new Date(Date.now() + 1 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+    priority: 'high',
+    category: 'kuis',
+    isCompleted: false,
+    createdAt: new Date().toISOString(),
+  },
+  {
+    id: 't4',
+    courseId: 'c4',
+    title: 'Ujian Tengah Semester (UTS) Kecerdasan Buatan',
+    description: 'Bawa kartu ujian resmi dan KTM di R.402',
+    dueDate: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+    priority: 'high',
+    category: 'uts',
+    isCompleted: false,
     createdAt: new Date().toISOString(),
   },
 ];
@@ -194,30 +253,6 @@ export function saveUser(user: User | null): void {
   }
 }
 
-export function loadTheme(): 'light' | 'dark' {
-  try {
-    const saved = localStorage.getItem(THEME_KEY);
-    if (saved === 'dark' || saved === 'light') return saved;
-    return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-  } catch {
-    return 'light';
-  }
-}
-
-export function saveTheme(theme: 'light' | 'dark'): void {
-  try {
-    localStorage.setItem(THEME_KEY, theme);
-    if (theme === 'dark') {
-      document.documentElement.classList.add('dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-    }
-  } catch (err) {
-    console.error('Failed to save theme', err);
-  }
-}
-
-// Cloudflare D1 Sync Service
 export async function syncWithCloudflareD1(
   user: User,
   courses: Course[],
