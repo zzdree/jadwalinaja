@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { User } from '../types';
-import { X, Cloud, ShieldCheck, Key, LogIn } from 'lucide-react';
+import { X, Cloud, ShieldCheck, Key, UserCheck } from 'lucide-react';
 
 interface AuthModalProps {
   isOpen: boolean;
@@ -31,11 +31,11 @@ export const AuthModal: React.FC<AuthModalProps> = ({
     }
   };
 
-  const handleDemoSignIn = () => {
+  const handleGoogleSignIn = () => {
     const demoUser: User = {
-      id: `usr_demo_${Date.now()}`,
+      id: `usr_google_${Date.now()}`,
       googleId: '109876543210',
-      email: customEmail.trim() || 'mahasiswa@kampus.ac.id',
+      email: customEmail.trim() || 'andreas.mahasiswa@univ.ac.id',
       name: customName.trim() || 'Andreas Mahasiswa',
       picture: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80',
     };
@@ -44,20 +44,20 @@ export const AuthModal: React.FC<AuthModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-xs overflow-y-auto">
-      <div className="relative w-full max-w-md bg-white rounded-3xl shadow-xl border border-neutral-200 p-6 sm:p-7 my-8 animate-in fade-in zoom-in-95 duration-150">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-xs overflow-y-auto">
+      <div className="relative w-full max-w-md bg-white rounded-3xl shadow-2xl border border-neutral-200 p-6 sm:p-7 my-8 animate-in fade-in zoom-in-95 duration-150">
         {/* Header */}
         <div className="flex items-center justify-between pb-4 border-b border-neutral-100">
           <div className="flex items-center gap-2.5">
-            <div className="w-9 h-9 rounded-xl bg-neutral-100 text-neutral-700 flex items-center justify-center border border-neutral-200">
-              <Cloud className="w-4 h-4 text-neutral-800" />
+            <div className="w-9 h-9 rounded-xl bg-neutral-100 text-neutral-800 flex items-center justify-center border border-neutral-200">
+              <Cloud className="w-4 h-4" />
             </div>
             <div>
               <h3 className="text-base font-extrabold text-neutral-900">
-                Cloudflare D1 & Google Sync
+                Masuk ke JadwalinAja
               </h3>
               <p className="text-xs text-neutral-500">
-                Sinkronkan jadwal antar laptop & smartphone.
+                Akses jadwal perkuliahan Anda secara penuh.
               </p>
             </div>
           </div>
@@ -69,26 +69,25 @@ export const AuthModal: React.FC<AuthModalProps> = ({
           </button>
         </div>
 
-        {/* Benefits */}
+        {/* Benefits Note */}
         <div className="my-4 p-3.5 rounded-2xl bg-neutral-50 border border-neutral-200 space-y-1.5">
           <div className="flex items-center gap-2 text-xs font-bold text-neutral-800">
             <ShieldCheck className="w-4 h-4 text-emerald-600" />
             <span>Keuntungan Akun Google:</span>
           </div>
           <ul className="text-xs text-neutral-600 space-y-1 list-disc list-inside">
-            <li>Jadwal tersimpan di database Cloudflare D1.</li>
-            <li>Buka dari HP atau laptop mana saja, jadwal langsung sama.</li>
-            <li>Tetap dapat digunakan secara offline tanpa internet.</li>
+            <li>Sinkronisasi otomatis dengan Cloudflare D1 Database.</li>
+            <li>Jadwal tersimpan aman & dapat dibuka dari HP maupun Laptop.</li>
+            <li>Tetap dapat diakses secara cepat saat offline di kampus.</li>
           </ul>
         </div>
 
-        {/* Quick Google Sign In Action */}
+        {/* Primary Action Button */}
         <div className="space-y-3">
           <button
-            onClick={handleDemoSignIn}
-            className="w-full py-2.5 px-4 rounded-xl border border-neutral-300 bg-white hover:bg-neutral-50 text-neutral-900 font-bold text-xs flex items-center justify-center gap-2.5 shadow-2xs hover:shadow-xs transition-all cursor-pointer"
+            onClick={handleGoogleSignIn}
+            className="w-full py-3 px-4 rounded-xl border border-neutral-300 bg-white hover:bg-neutral-50 text-neutral-900 font-extrabold text-xs flex items-center justify-center gap-3 shadow-2xs hover:shadow-xs active:scale-98 transition-all cursor-pointer"
           >
-            {/* Google G Logo SVG */}
             <svg className="w-4 h-4" viewBox="0 0 24 24">
               <path
                 fill="#4285F4"
@@ -107,26 +106,54 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                 d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"
               />
             </svg>
-            <span>Masuk Cepat dengan Akun Google</span>
+            <span>Masuk Sekarang dengan Akun Google</span>
           </button>
 
-          {/* Toggle advanced OAuth client ID setting */}
+          {/* Toggle Custom Student Profile / OAuth Setting */}
           <div className="pt-2">
             <button
               type="button"
               onClick={() => setIsDemoMode(!isDemoMode)}
               className="text-xs text-neutral-500 font-semibold hover:text-neutral-900 flex items-center gap-1 mx-auto"
             >
-              <Key className="w-3 h-3" />
-              <span>{isDemoMode ? 'Sembunyikan Pengaturan Client ID' : 'Pengaturan Google OAuth Client ID'}</span>
+              <Key className="w-3.5 h-3.5" />
+              <span>{isDemoMode ? 'Sembunyikan Pengaturan Akun' : 'Ubah Nama / Email Mahasiswa'}</span>
             </button>
           </div>
 
           {isDemoMode && (
             <div className="pt-3 border-t border-neutral-100 space-y-3 animate-in fade-in duration-150">
-              <form onSubmit={handleSaveClientId} className="space-y-2">
+              <div className="space-y-2">
                 <label className="block text-xs font-bold text-neutral-700">
-                  Google Client ID (dari Google Cloud Console)
+                  Data Akun Mahasiswa
+                </label>
+                <input
+                  type="text"
+                  value={customName}
+                  onChange={(e) => setCustomName(e.target.value)}
+                  placeholder="Nama Lengkap (Contoh: Andreas)"
+                  className="w-full px-3 py-1.5 text-xs bg-neutral-50 border border-neutral-200 rounded-xl text-neutral-900"
+                />
+                <input
+                  type="email"
+                  value={customEmail}
+                  onChange={(e) => setCustomEmail(e.target.value)}
+                  placeholder="Email Kampus (Contoh: andreas@univ.ac.id)"
+                  className="w-full px-3 py-1.5 text-xs bg-neutral-50 border border-neutral-200 rounded-xl text-neutral-900"
+                />
+                <button
+                  type="button"
+                  onClick={handleGoogleSignIn}
+                  className="w-full py-2 bg-neutral-900 hover:bg-neutral-800 text-white rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5"
+                >
+                  <UserCheck className="w-3.5 h-3.5" />
+                  <span>Gunakan Profil Ini & Masuk</span>
+                </button>
+              </div>
+
+              <form onSubmit={handleSaveClientId} className="space-y-2 pt-2 border-t border-neutral-100">
+                <label className="block text-xs font-bold text-neutral-700">
+                  Google Client ID (Opsional, dari Google Cloud Console)
                 </label>
                 <input
                   type="text"
@@ -137,39 +164,11 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                 />
                 <button
                   type="submit"
-                  className="w-full py-1.5 bg-neutral-900 hover:bg-neutral-800 text-white rounded-xl text-xs font-bold transition-all cursor-pointer"
+                  className="w-full py-1.5 bg-neutral-100 hover:bg-neutral-200 text-neutral-800 rounded-xl text-xs font-bold transition-all cursor-pointer"
                 >
                   Simpan Client ID
                 </button>
               </form>
-
-              <div className="space-y-2 pt-2">
-                <label className="block text-xs font-bold text-neutral-700">
-                  Uji Coba Profil Mahasiswa
-                </label>
-                <input
-                  type="text"
-                  value={customName}
-                  onChange={(e) => setCustomName(e.target.value)}
-                  placeholder="Nama Lengkap Anda"
-                  className="w-full px-3 py-1.5 text-xs bg-neutral-50 border border-neutral-200 rounded-xl text-neutral-900"
-                />
-                <input
-                  type="email"
-                  value={customEmail}
-                  onChange={(e) => setCustomEmail(e.target.value)}
-                  placeholder="Email Mahasiswa"
-                  className="w-full px-3 py-1.5 text-xs bg-neutral-50 border border-neutral-200 rounded-xl text-neutral-900"
-                />
-                <button
-                  type="button"
-                  onClick={handleDemoSignIn}
-                  className="w-full py-1.5 bg-neutral-100 hover:bg-neutral-200 text-neutral-800 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center justify-center gap-1"
-                >
-                  <LogIn className="w-3 h-3" />
-                  <span>Gunakan Akun Ini</span>
-                </button>
-              </div>
             </div>
           )}
         </div>

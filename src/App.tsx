@@ -9,6 +9,7 @@ import {
   saveUser,
   syncWithCloudflareD1,
 } from './lib/storage';
+import { LandingPage } from './components/LandingPage';
 import { Navbar } from './components/Navbar';
 import { NextClassBanner } from './components/NextClassBanner';
 import { WeeklyTimetable } from './components/WeeklyTimetable';
@@ -127,7 +128,7 @@ export function App() {
   };
 
   const handleLogout = () => {
-    if (confirm('Yakin ingin keluar dari akun Google?')) {
+    if (confirm('Yakin ingin keluar dari akun?')) {
       setUser(null);
       saveUser(null);
       setSyncToast('Berhasil keluar akun');
@@ -140,6 +141,25 @@ export function App() {
     if (importedTasks.length > 0) setTasks(importedTasks);
   };
 
+  // 1. If NOT logged in, show Landing Page with Preview & Google Login CTA
+  if (!user) {
+    return (
+      <>
+        <LandingPage
+          onLoginClick={() => setIsAuthModalOpen(true)}
+          sampleCourses={courses}
+        />
+        <AuthModal
+          isOpen={isAuthModalOpen}
+          onClose={() => setIsAuthModalOpen(false)}
+          user={user}
+          onLoginSuccess={handleLoginSuccess}
+        />
+      </>
+    );
+  }
+
+  // 2. If LOGGED IN, show the Full Interactive App Dashboard
   return (
     <div className="min-h-screen flex flex-col bg-[#fafafa] text-neutral-900 selection:bg-neutral-200">
       {/* Top Navigation */}
